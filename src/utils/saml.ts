@@ -643,7 +643,12 @@ const validateIssuer = (
         .getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Issuer")
         .item(0)
     )
-  ).chain(Issuer =>
+  ).chain(fromPredicate(
+    () => {
+      return fatherElement === fatherElement.getElementsByTagNameNS(SAML_NAMESPACE.ASSERTION, "Issuer").item(0)?.parentNode;
+    },
+    () => new Error("Issuer element must be present as direct child on "+fatherElement)
+  )).chain(Issuer =>
     NonEmptyString.decode(Issuer.textContent?.trim())
       .mapLeft(() => new Error("Issuer element must be not empty"))
       .chain(
